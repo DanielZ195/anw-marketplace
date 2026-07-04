@@ -1,0 +1,58 @@
+name: build-registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "sources/**"
+      - "scripts/**"
+      - "package.json"
+  pull_request:
+    paths:
+      - "sources/**"
+      - "scripts/**"
+      - "package.json"
+  workflow_dispatch: {}
+
+concurrency:
+  group: build-registry-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # PRs only gate — the committed output must already match the sources.
+      - name: Check generated output (PR)
+        if: github.event_name == 'pull_request'
+        run: npm run check
+
+      # Pushes to main regenerate and commit anything missing/stale.
+      - name: Build registry (main)
+        if: github.event_name != 'pull_request'
+        run: npm run build
+
+      - name: Commit generated output
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -n "$(git status --porcelain bundles registry.json)" ]; then
+            git config user.name "registry-bot"
+            git config user.email "registry-bot@users.noreply.github.com"
+            git add bundles registry.json
+            git commit -m "build: regenerate registry from sources"
+            git push
+          else
+            echo "registry already current"
+          fi

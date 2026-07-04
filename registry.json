@@ -1,0 +1,10 @@
+{
+  "bundles": {
+    "@daniel/hello-marketplace": {
+      "id": "@daniel/hello-marketplace",
+      "version": "0.1.0",
+      "description": "Verify a marketplace install end-to-end by greeting the workspace and reporting which bundle version is running.",
+      "payload_url": "https://raw.githubusercontent.com/DanielZ195/anw-marketplace/main/bundles/daniel/hello-marketplace/0.1.0.json"
+    }
+  }
+}

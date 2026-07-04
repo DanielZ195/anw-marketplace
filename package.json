@@ -1,0 +1,14 @@
+{
+  "name": "anw-marketplace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Registry + bundle sources for the ANW marketplace (skills, hooks, events, folder-pattern templates).",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-registry.mjs",
+    "check": "node scripts/build-registry.mjs --check"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

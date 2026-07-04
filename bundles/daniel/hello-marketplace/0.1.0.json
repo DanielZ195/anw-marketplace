@@ -1,0 +1,16 @@
+{
+  "id": "@daniel/hello-marketplace",
+  "kind": "skill",
+  "name": "hello-marketplace",
+  "version": "0.1.0",
+  "description": "Verify a marketplace install end-to-end by greeting the workspace and reporting which bundle version is running.",
+  "min_substrate_version": "0.1.0",
+  "model_min_class": "local-small",
+  "capabilities": [
+    "file-read"
+  ],
+  "tested_vendors": {},
+  "author": "daniel",
+  "long_description": "A minimal working skill used to prove the registry → install → dispatch pipeline. Installing it and invoking it confirms the app can fetch this registry, validate the bundle, materialize a runnable SKILL.md, and route a request to it.",
+  "body": "When invoked, do the following:\n\n1. Greet the user and state that you were installed from the `@daniel/hello-marketplace`\n   bundle, version 0.1.0.\n2. Report the name of the workspace root folder you are running in.\n3. Confirm the install pipeline worked by listing which capabilities you were\n   granted (this skill declares only `file-read`).\n\nKeep the whole response under five lines."
+}
