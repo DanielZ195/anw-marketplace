@@ -1,6 +1,7 @@
 ---
 kind: event
 name: _template            # MUST match the folder name; kebab-case
+author: your-handle        # REQUIRED — becomes the "@author/name" id namespace; lowercase/digits/hyphens
 description: One-line description of what this system event reacts to.
 version: 0.1.0
 trigger: file_created      # REQUIRED — must be a value from the app's EVENT.md trigger vocabulary

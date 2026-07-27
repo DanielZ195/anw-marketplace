@@ -32,8 +32,13 @@ const CHECK = process.argv.includes('--check');
 // Publishing constants
 // ---------------------------------------------------------------------------
 
-const AUTHOR = 'daniel';
 const REPO_RAW_BASE = 'https://raw.githubusercontent.com/DanielZ195/anw-marketplace/main';
+
+// Every bundle declares its own author, which becomes both its id namespace
+// (`@<author>/<name>`) and its payload directory. It is required rather than
+// defaulted: a default would silently publish a contributor's bundle under
+// somebody else's name.
+const AUTHOR_RE = /^[a-z0-9][a-z0-9-]*$/;
 
 // Closed sets — MUST match lib/platform/marketplace-manifest.ts in the app.
 const CAPABILITY_TOKENS = new Set([
@@ -97,8 +102,16 @@ function buildManifest(kind, name, fm, body, srcPath) {
     errors.push(`frontmatter name "${fm.name}" does not match folder name "${name}"`);
   }
 
+  const author = fm.author;
+  if (typeof author !== 'string' || !AUTHOR_RE.test(author)) {
+    errors.push(
+      'missing or invalid required field "author" ' +
+        '(lowercase letters, digits and hyphens; it becomes the "@author/name" id namespace)',
+    );
+  }
+
   const manifest = {
-    id: `@${AUTHOR}/${name}`,
+    id: `@${author}/${name}`,
     kind,
     name,
     version: fm.version,
@@ -107,7 +120,7 @@ function buildManifest(kind, name, fm, body, srcPath) {
     model_min_class: fm.model_min_class ?? DEFAULTS.model_min_class,
     capabilities: fm.capabilities ?? DEFAULTS.capabilities,
     tested_vendors: fm.tested_vendors ?? DEFAULTS.tested_vendors,
-    author: AUTHOR,
+    author,
   };
 
   req('version', typeof manifest.version === 'string' && SEMVER_RE.test(manifest.version));
@@ -183,7 +196,7 @@ function scanSources() {
 // ---------------------------------------------------------------------------
 
 function payloadRelPath(manifest) {
-  return join('bundles', AUTHOR, manifest.name, `${manifest.version}.json`);
+  return join('bundles', manifest.author, manifest.name, `${manifest.version}.json`);
 }
 
 function sha256(s) {

@@ -1,6 +1,7 @@
 ---
 kind: skill
 name: _template            # MUST match the folder name; kebab-case
+author: your-handle        # REQUIRED — becomes the "@author/name" id namespace; lowercase/digits/hyphens
 description: One-line agent-facing description (what the skill does and when to use it).
 version: 0.1.0             # semver; bump on EVERY content change — published payloads are immutable
 capabilities: []           # closed set: file-read, file-write, network-egress, executes-code, paid-apis
