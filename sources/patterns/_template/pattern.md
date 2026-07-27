@@ -1,6 +1,7 @@
 ---
 kind: pattern/folder
 name: _template            # MUST match the folder name; kebab-case
+author: your-handle        # REQUIRED — becomes the "@author/name" id namespace; lowercase/digits/hyphens
 description: One-line description of the workflow this folder pattern installs.
 version: 0.1.0
 category: productivity     # REQUIRED — pattern card category

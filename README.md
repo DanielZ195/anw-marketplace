@@ -14,6 +14,7 @@ by the app's locked FLOWS-FREE ruling.
 ```
 registry.json                  GENERATED — the index the app fetches
 bundles/<author>/<name>/<v>.json  GENERATED — immutable versioned payloads
+known-bad.json                 AUTHORED — the kill list (see below)
 sources/                       AUTHORED — the only place you edit
   skills/<name>/SKILL.md
   hooks/<name>/HOOK.md
@@ -27,9 +28,10 @@ the build — copy one to start a new bundle.
 
 ## Publishing a bundle
 
-1. Copy the kind's `_template/` folder to `sources/<kind>/<your-name>/` and
-   fill in the frontmatter + body. The folder name is the bundle name; the
-   published id becomes `@daniel/<name>`.
+1. Copy the kind's `_template/` folder to `sources/<kind>/<bundle-name>/` and
+   fill in the frontmatter + body. The folder name is the bundle name, and the
+   required `author` frontmatter field is the id namespace, so the published id
+   becomes `@<author>/<bundle-name>`.
 2. Push to `main` (or open a PR — CI verifies the generated output on PRs).
 3. The `build-registry` workflow validates the bundle, writes the versioned
    payload under `bundles/`, regenerates `registry.json`, and commits both.
@@ -49,7 +51,7 @@ resolving to byte-identical content forever.
 The build derives each payload from the authored frontmatter and validates it
 against the same contracts the app's installer enforces (manifest schema +
 per-kind required fields). Required everywhere: `name` (= folder name),
-`description`, `version` (semver). Kind-specific requirements: hooks need
+`author`, `description`, `version` (semver). Kind-specific requirements: hooks need
 `trigger`; events need `trigger` + `runtime`; patterns need `category`.
 Capability tokens are the closed set `file-read`, `file-write`,
 `network-egress`, `executes-code`, `paid-apis`. Defaults applied when
@@ -58,19 +60,34 @@ omitted: `model_min_class: local-small`, `min_substrate_version: 0.1.0`,
 
 ## Consuming the registry (app side)
 
-Point the app at:
+This repo is public, and this registry is the app's **default** — a stock
+`anw serve` browses it with no configuration and no credentials:
 
 ```
 https://raw.githubusercontent.com/DanielZ195/anw-marketplace/main/registry.json
 ```
 
-**While this repo is private**, raw URLs require authentication. Create a
-fine-grained PAT scoped to this single repo with read-only Contents
-permission, and have the app's injected fetch send it:
+`ANW_REGISTRY_URL` overrides that default. Set it to another `registry.json`
+URL to run your own registry, or to an **empty value** to disable the
+marketplace entirely — the app then contacts nothing and says so in the panel.
 
-```js
-fetch(url, { headers: { Authorization: `token ${process.env.ANW_REGISTRY_TOKEN}` } })
+Private registries are still supported: set `ANW_REGISTRY_TOKEN` to a
+fine-grained PAT with read-only Contents permission on the registry repo. The
+app attaches it only to requests for the registry's own host, never to bundle
+URLs on other hosts, and it stays server-side (same pattern as the LLM
+provider keys). This public registry needs no token.
+
+## The kill list
+
+`known-bad.json` is the takedown channel. The app fetches it alongside the
+registry and force-disables any installed bundle listed there, so a bundle
+found to be harmful stops loading in workspaces that already installed it.
+
+```json
+{ "entries": [{ "hookId": "@author/bundle-name" }] }
 ```
 
-The token lives server-side only (same pattern as the LLM provider keys).
-When the repo goes public, drop the token — the URLs do not change.
+It ships empty. Entries are added by hand — this is a safety switch, not
+generated output — and removing an entry re-enables the bundle on the next
+fetch. Fetching it fails open: an unreachable list never blocks a workspace
+from starting.

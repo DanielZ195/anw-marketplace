@@ -1,6 +1,7 @@
 ---
 kind: skill
 name: hello-marketplace
+author: daniel
 description: Verify a marketplace install end-to-end by greeting the workspace and reporting which bundle version is running.
 version: 0.1.0
 capabilities:

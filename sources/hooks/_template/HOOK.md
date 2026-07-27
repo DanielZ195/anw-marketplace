@@ -1,6 +1,7 @@
 ---
 kind: hook
 name: _template            # MUST match the folder name; kebab-case
+author: your-handle        # REQUIRED — becomes the "@author/name" id namespace; lowercase/digits/hyphens
 description: One-line description of what this hook intercepts and why.
 version: 0.1.0
 trigger: before_tool_use   # REQUIRED — one of the app's locked trigger events:
