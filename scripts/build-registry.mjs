@@ -224,12 +224,27 @@ function main() {
     }
   }
 
+  // The index carries everything a browse row renders, so listing the catalogue
+  // is one request rather than one per bundle.
+  //
+  // This is the model every comparable system uses — apt's Packages index beside
+  // separate .debs, Homebrew's formulae repo, Helm's index.yaml beside chart
+  // tarballs. None of them downloads an artifact to draw a list. The client had
+  // been fetching every payload on every refresh to read two fields, because the
+  // index mirrored only `description` and stopped.
+  //
+  // `long_description` is mirrored for the agent's bundle search, which ranks on
+  // it: without it here, dropping the per-bundle fetch would silently cost that
+  // search its recall. It is the largest field in the index by some way, and it
+  // is still one cacheable response against N.
   const registry = { bundles: {} };
   for (const manifest of manifests) {
     registry.bundles[manifest.id] = {
       id: manifest.id,
       version: manifest.version,
       description: manifest.description,
+      long_description: manifest.long_description,
+      kind: manifest.kind,
       payload_url: `${REPO_RAW_BASE}/${payloadRelPath(manifest).split('\\').join('/')}`,
     };
   }
